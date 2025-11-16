@@ -1,0 +1,4 @@
+# Requisitos 
+
+Django>=4.0.0
+python-dateutil>=2.8.0
