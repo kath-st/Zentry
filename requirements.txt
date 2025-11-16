@@ -1,0 +1,21 @@
+# Núcleo
+pandas==2.2.3
+openpyxl==3.1.5
+python-dateutil==2.9.0.post0
+
+# Calidad de código (opcional pero recomendado)
+black==24.8.0
+ruff==0.6.8
+pre-commit==3.8.0
+
+# Pruebas
+pytest==8.3.2
+pytest-cov==5.0.0
+
+# (Opcional) API si expones endpoints del carrito
+fastapi==0.115.0
+uvicorn==0.30.6
+pydantic==2.9.2
+
+# (Opcional) Capa de persistencia alternativa
+SQLAlchemy==2.0.35

@@ -1,0 +1,1 @@
+# Core package - contains domain logic and data structures

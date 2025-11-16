@@ -1,0 +1,20 @@
+{
+    "python.defaultInterpreterPath": "./venv/bin/python",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.analysis.typeCheckingMode": "off",
+    "python.analysis.autoSearchPaths": true,
+    "python.analysis.extraPaths": [
+        "./core",
+        "."
+    ],
+    "python.analysis.diagnosticMode": "workspace",
+    "files.associations": {
+        "*.py": "python"
+    },
+    "python.analysis.stubPath": "./typings",
+    "python.envFile": "${workspaceFolder}/.env",
+    "python-envs.pythonProjects": [],
+    "django.enabled": true,
+    "django.settingsModule": "zentry_django.settings"
+}
