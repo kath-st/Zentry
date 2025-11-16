@@ -1,0 +1,15 @@
+# Archivos y Carpetas Ignoradas
+
+# Entorno Virtual
+venv/
+*.pyc
+__pycache__/
+
+# Django
+db.sqlite3
+/media/
+/static/
+
+# IDE files
+.vscode/
+.idea/
