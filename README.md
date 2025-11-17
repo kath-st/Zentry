@@ -11,8 +11,11 @@ Zentry es un sistema de gestión de tickets para conciertos desarrollado como pr
 ### Componentes Principales
 
 #### 📦 Core (`core/`)
-- `datastructures/stack.py`: **Stack** para funcionalidad de Undo (mantenido intacto)
+- `datastructures/stack.py`: **Stack** para funcionalidad de Undo (Katherine)
+- `datastructures/linked_list.py`: **LinkedList** genérica con ordenamiento (Cerna)
 - `domain/models.py`: Modelos de dominio (CartItem, Cart, excepciones)
+- `domain/event_catalog.py`: Modelos para catálogo dinámico de eventos (Cerna)
+- `services/event_catalog_service.py`: Servicio de catálogo con búsqueda/ordenamiento (Cerna)
 - `services/`: Interfaces abstractas y servicios concretos con Django
 
 #### 🎪 Apps Django
@@ -21,6 +24,18 @@ Zentry es un sistema de gestión de tickets para conciertos desarrollado como pr
 - **cart**: Carrito de compras con Undo usando Stack
 
 ## 🚀 Funcionalidades
+
+### 📂 Catálogo Dinámico de Eventos (Módulo de Cerna)
+- ✅ **Lista Enlazada** para almacenar eventos de forma dinámica
+- ✅ **Búsqueda avanzada**: por nombre, artista, lugar, rango de precios, fechas
+- ✅ **Ordenamiento eficiente**: 
+  - **MergeSort** (O(n log n) estable) 
+  - **QuickSort** (O(n log n) promedio)
+  - Por fecha, precio, popularidad
+- ✅ **Búsqueda binaria**: en datos ordenados (O(log n))
+- ✅ **Filtrado dinámico**: eventos próximos, disponibles, agotados
+- ✅ **Estadísticas en tiempo real**: ocupación, ingresos, trending
+- ✅ **Índices rápidos**: acceso O(1) por ID
 
 ### Carrito de Compras (Módulo de Katherine)
 - ✅ **Añadir items** al carrito con validación de stock
@@ -42,12 +57,25 @@ estado_restaurado = stack.pop()  # Undo
 ```
 
 ### API REST
-- `GET /api/cart/` - Obtener carrito actual
-- `POST /api/cart/add/` - Añadir item
-- `POST /api/cart/update/` - Actualizar cantidad
-- `POST /api/cart/remove/` - Eliminar item  
-- `POST /api/cart/clear/` - Vaciar carrito
-- `POST /api/cart/undo/` - Deshacer última operación
+- **Catálogo (Cerna)**:
+  - `GET /api/catalog/` - Listar eventos (con ordenamiento)
+  - `GET /api/catalog/{id}/` - Obtener evento específico
+  - `POST /api/catalog/` - Crear evento
+  - `GET /api/catalog/search/?q=término&type=name|artist|venue` - Búsqueda
+  - `GET /api/catalog/sort/by-date/` - Ordenar por fecha
+  - `GET /api/catalog/sort/by-price/` - Ordenar por precio
+  - `GET /api/catalog/sort/by-popularity/` - Ordenar por popularidad
+  - `GET /api/catalog/trending/?limit=10` - Eventos en tendencia
+  - `GET /api/catalog/featured/?limit=5` - Eventos destacados
+  - `GET /api/catalog/statistics/` - Estadísticas generales
+
+- **Carrito (Katherine)**:
+  - `GET /api/cart/` - Obtener carrito actual
+  - `POST /api/cart/add/` - Añadir item
+  - `POST /api/cart/update/` - Actualizar cantidad
+  - `POST /api/cart/remove/` - Eliminar item  
+  - `POST /api/cart/clear/` - Vaciar carrito
+  - `POST /api/cart/undo/` - Deshacer última operación
 
 ## 📋 Instalación y Configuración
 
@@ -91,21 +119,29 @@ python manage.py runserver
 ### Ejecutar Tests
 ```bash
 # Todas las pruebas
-python manage.py test
+python -m pytest tests/ -v
 
-# Solo tests del Stack (estructura de datos)
-python manage.py test tests.test_stack
+# Tests del Catálogo (Cerna - LinkedList, búsqueda, ordenamiento)
+python -m pytest tests/test_event_catalog.py -v
 
-# Solo tests de Undo del carrito
-python manage.py test tests.test_cart_undo
+# Tests del Stack (estructura de datos)
+python -m pytest tests/test_stack.py -v
 
-# Tests de integración completa
-python manage.py test tests.test_cart_integration
+# Tests de Undo del carrito (Katherine)
+python -m pytest tests/test_cart_undo.py -v
+
+# Tests de integración
+python -m pytest tests/test_cart_integration.py -v
+
+# Con cobertura
+python -m pytest tests/ --cov=core --cov=api --cov-report=html
 ```
 
 ### Cobertura de Pruebas
+- ✅ **LinkedList** (Cerna): Insert, delete, search, filter, merge sort, quick sort, binary search
+- ✅ **Catálogo de Eventos** (Cerna): CRUD, búsqueda avanzada, ordenamiento, estadísticas
 - ✅ **Stack**: Pruebas unitarias de push/pop/peek/overflow/underflow
-- ✅ **Cart Undo**: Todas las operaciones + undo + múltiples usuarios
+- ✅ **Cart Undo** (Katherine): Todas las operaciones + undo + múltiples usuarios
 - ✅ **Integración**: Flujos completos, concurrencia, consistencia de datos
 
 ## 📊 Modelo de Datos
@@ -125,6 +161,20 @@ CartItemModel: usuario, evento, zona, cantidad, precio, reserva
 
 ### Modelos de Dominio (En Memoria)
 ```python
+# Catálogo (Cerna)
+@dataclass
+class EventCatalog:
+    id: int
+    name: str
+    venue: str
+    date: datetime
+    min_price: float
+    max_price: float
+    total_capacity: int
+    sold_tickets: int = 0
+    artist_name: str = ""
+
+# Carrito (Katherine)
 @dataclass
 class CartItem:
     event_id: int
@@ -137,6 +187,30 @@ class CartItem:
 class Cart:
     user_id: str
     items: list[CartItem]
+```
+
+### Estructuras de Datos Utilizadas
+```python
+# Cerna - Catálogo Dinámico
+LinkedList[EventCatalog]           # Almacenamiento principal
+dict[int, EventCatalog]            # Índice rápido por ID
+
+# Katherine - Carrito con Undo
+Stack[Cart]                        # Historial de operaciones
+list[CartItem]                     # Items del carrito actual
+
+# Xiomara - Gestión de Asientos (Pendiente)
+list[list[Seat]]                   # Matriz de asientos
+CircularQueue[Reservation]         # Cola de reservas
+
+# Diana - Registro de Usuarios (Pendiente)
+dict[str, User]                    # Índice de usuarios
+list[Purchase]                     # Historial de compras
+
+# Rony - Validación de Tickets (Pendiente)
+Queue[Visitor]                     # Fila de ingreso
+HashSet[str]                       # Tickets validados
+BinarySearchTree[Ticket]           # Búsqueda de tickets
 ```
 
 ## 🔄 Flujo de Operaciones
@@ -164,14 +238,39 @@ class Cart:
 - **Service Layer**: Lógica de negocio separada
 - **Domain Model**: Objetos de dominio independientes de la persistencia
 - **Command Pattern**: Stack de operaciones para Undo
+- **Iterator Pattern**: Recorrido de LinkedList
+- **Strategy Pattern**: Comparadores intercambiables para ordenamiento
 
 ## 🎯 Objetivos Académicos Cumplidos
 
-1. **Estructura de Datos**: Stack implementado y usado explícitamente
-2. **Operaciones**: Push/Pop para gestión de estados
-3. **Manejo de Excepciones**: StackUnderflow/StackOverflow
-4. **Casos de Uso Reales**: Sistema de Undo en aplicación práctica
-5. **Testing Completo**: Cobertura de todos los escenarios
+### Cerna - Catálogo Dinámico de Eventos
+1. ✅ **Lista Enlazada**: Estructura genérica implementada con nodos
+2. ✅ **Algoritmos de Ordenamiento**: MergeSort y QuickSort
+3. ✅ **Búsqueda Binaria**: En datos ordenados O(log n)
+4. ✅ **Búsqueda Lineal**: Con filtros flexibles
+5. ✅ **Complejidad**: Análisis O(n log n) para ordenamiento
+6. ✅ **Testing**: Pruebas completas de estructura y algoritmos
+
+### Katherine - Carrito con Undo
+1. ✅ **Estructura de Datos**: Stack implementado y usado explícitamente
+2. ✅ **Operaciones**: Push/Pop para gestión de estados
+3. ✅ **Manejo de Excepciones**: StackUnderflow/StackOverflow
+4. ✅ **Casos de Uso Reales**: Sistema de Undo en aplicación práctica
+5. ✅ **Testing Completo**: Cobertura de todos los escenarios
+
+### Equipo - Futuras Integraciones
+- ⏳ Xiomara: Matriz y Cola Circular para asientos/reservas
+- ⏳ Diana: Hash y Estructura de Usuario para registro
+- ⏳ Rony: Colas y ABB para validación de tickets
+
+## 📖 Documentación Completa
+
+- [Catálogo Dinámico de Eventos (Cerna)](./CATALOGO_EVENTOS_CERNA.md)
+  - Arquitectura de LinkedList
+  - Algoritmos de búsqueda y ordenamiento
+  - Complejidad computacional detallada
+  - Ejemplos de uso completos
+  - Integración con otros módulos
 
 ## 👥 Equipo
 
