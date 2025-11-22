@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="mb-4">Catálogo de Eventos</h2>
+        </div>
+    </div>
+
+    {% if eventos %}
+    <div class="row">
+        {% for evento in eventos %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ evento.name }}</h5>
+                    <p class="card-text">
+                        <strong>Lugar:</strong> {{ evento.venue }}<br>
+                        <strong>Fecha:</strong> {{ evento.date|date:"d/m/Y H:i" }}<br>
+                        {% if evento.description %}
+                        <strong>Descripción:</strong> {{ evento.description }}<br>
+                        {% endif %}
+                    </p>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'reservas:seleccionar_evento' evento.id %}" class="btn btn-primary">Ver Detalles y Comprar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center">
+        <p>No hay eventos disponibles en este momento.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

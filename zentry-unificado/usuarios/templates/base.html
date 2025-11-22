@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Zentry - Sistema de Eventos{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00d4ff;
+            --neon-purple: #b537ff;
+            --dark-bg: #0a0a0f;
+            --dark-card: #13131a;
+            --dark-border: #1f1f2e;
+            --text-primary: #e5e5e5;
+            --text-secondary: #9ca3af;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .navbar {
+            background-color: var(--dark-card) !important;
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .navbar-brand {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .navbar-light .navbar-nav .nav-link {
+            color: var(--text-primary) !important;
+            transition: color 0.3s;
+        }
+
+        .navbar-light .navbar-nav .nav-link:hover {
+            color: var(--neon-blue) !important;
+        }
+
+        .card {
+            background-color: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .card-header {
+            background-color: transparent;
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, var(--neon-blue), #00b8e6);
+            border: none;
+            color: var(--dark-bg);
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 20px var(--neon-blue);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            border: 2px solid var(--neon-purple);
+            background: transparent;
+            color: var(--neon-purple);
+            font-weight: 600;
+        }
+
+        .btn-secondary:hover {
+            background: var(--neon-purple);
+            color: var(--dark-bg);
+        }
+
+        .form-control, .form-select {
+            background-color: var(--dark-bg);
+            border: 1px solid var(--dark-border);
+            color: var(--text-primary);
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: var(--dark-bg);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+            color: var(--text-primary);
+        }
+
+        .form-label {
+            color: var(--text-secondary);
+        }
+
+        .alert {
+            border-radius: 0.5rem;
+        }
+
+        .alert-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+            color: #fca5a5;
+        }
+
+        .alert-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-color: #10b981;
+            color: #6ee7b7;
+        }
+
+        a {
+            color: var(--neon-blue);
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: var(--neon-purple);
+        }
+
+        .neon-text {
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">Zentry</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="background-color: var(--dark-border);">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        {% if user.is_authenticated %}
+          <li class="nav-item"><a class="nav-link" href="/api/catalog/">Eventos</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'perfil' %}">Perfil</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Cerrar sesión</a></li>
+        {% else %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'registro' %}">Registrarse</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

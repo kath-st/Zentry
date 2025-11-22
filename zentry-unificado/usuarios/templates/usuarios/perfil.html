@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Perfil de Usuario</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>Nombre:</strong> {{ usuario.get_full_name }}</p>
+                    <p><strong>Email:</strong> {{ usuario.email }}</p>
+                    <p><strong>DNI:</strong> {{ usuario.dni }}</p>
+                    <p><strong>Teléfono:</strong> {{ usuario.telefono }}</p>
+                    <p><strong>Edad:</strong> {{ usuario.edad }} años</p>
+                    
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <a href="/eventos" class="btn btn-primary">Ver Catálogo de Eventos</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Historial de Compras</h4>
+                </div>
+                <div class="card-body">
+                        {% if usuario.es_comprador %}
+                        <div class="mb-3 text-end">
+                            <a href="{% url 'comprar' %}" class="btn btn-success">Registrar compra</a>
+                        </div>
+                        {% endif %}
+                    {% if historial %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Producto</th>
+                                        <th>Monto</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for compra in historial %}
+                                    <tr>
+                                        <td>{{ compra.fecha }}</td>
+                                        <td>{{ compra.producto }}</td>
+                                        <td>${{ compra.monto }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-center">No hay compras registradas</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
