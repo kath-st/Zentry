@@ -1,18 +1,58 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import Navbar from '../components/Navbar';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, CreditCard, Loader2, ArrowRight } from 'lucide-react';
+import { Trash2, CreditCard, Loader2, ArrowRight, Undo2, Clock } from 'lucide-react';
 
 export default function Cart() {
-  const { cartItems, removeFromCart, clearCart, cartTotal } = useCart();
+  const { cartItems, undoLastItem, releaseReservation, clearCart, cartTotal, expirationTime } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
 
   const [cvv, setCvv] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState('');
+
+  // Calcular tiempo restante
+  useEffect(() => {
+    if (!expirationTime) return;
+
+    const interval = setInterval(() => {
+      const now = new Date();
+      const diff = expirationTime - now;
+
+      if (diff <= 0) {
+        setTimeRemaining('Expirado');
+        clearInterval(interval);
+      } else {
+        const minutes = Math.floor(diff / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        setTimeRemaining(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [expirationTime]);
+
+  // Función para deshacer última acción (Stack LIFO)
+  const handleUndo = async () => {
+    const result = await undoLastItem();
+    if (result.success) {
+      // Opcional: mostrar mensaje de éxito
+    } else {
+      alert(result.error);
+    }
+  };
+
+  // Función para eliminar un item específico
+  const handleRemoveItem = async (seatId) => {
+    const result = await releaseReservation(seatId);
+    if (!result.success) {
+      alert(result.error);
+    }
+  };
 
   // Lógica de Compra Final
   const handleCheckout = async (e) => {
@@ -55,8 +95,8 @@ export default function Cart() {
       <Navbar />
 
       <div className="max-w-4xl mx-auto px-4 py-10">
-        <h1 className="text-3xl font-bold mb-8">Mi Carrito de Compras</h1>
-
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">Mi Carrito de Compras</h1>
         {cartItems.length === 0 ? (
            <div className="text-center py-20 bg-zentry-card rounded-2xl border border-white/5">
              <p className="text-gray-400 mb-4">Tu carrito está vacío.</p>
@@ -67,11 +107,33 @@ export default function Cart() {
              
              {/* LISTA DE ÍTEMS */}
              <div className="md:col-span-2 space-y-4">
+               {/* BOTÓN DESHACER (STACK LIFO) */}
+               {cartItems.length > 0 && (
+                 <button
+                   onClick={handleUndo}
+                   className="w-full bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-500 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all border border-yellow-500/30"
+                 >
+                   <Undo2 size={20} /> Deshacer Última Selección (Stack LIFO)
+                 </button>
+               )}
+
                {cartItems.map((item, index) => (
-                 <div key={index} className="bg-zentry-card p-4 rounded-xl border border-white/10 flex justify-between items-center">
-                    <div>
-                        <h3 className="font-bold">{item.eventName || "Entrada de Concierto"}</h3>
-                        <p className="text-sm text-zentry-muted">Asiento: {item.number}</p>
+
+        {cartItems.length === 0 ? (
+           <div className="text-center py-20 bg-zentry-card rounded-2xl border border-white/5">
+             <p className="text-gray-400 mb-4">Tu carrito está vacío.</p>
+             <button onClick={() => navigate('/')} className="text-zentry-primary hover:underline">Ir al Catálogo</button>
+           </div>
+        ) : (
+                    <div className="flex items-center gap-4">
+                        <span className="font-bold">${item.price}</span>
+                        <button 
+                            onClick={() => handleRemoveItem(item.id)}
+                            className="text-red-400 hover:text-red-300 p-2"
+                            title="Eliminar y liberar reserva"
+                        >
+                            <Trash2 size={20} />
+                        </button>
                     </div>
                     <div className="flex items-center gap-4">
                         <span className="font-bold">${item.price}</span>

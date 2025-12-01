@@ -55,7 +55,7 @@ export default function EventDetails() {
   };
 
   // 3. Agregar al Carrito (Lógica Corregida con Precios Reales)
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!user) return navigate('/login');
 
     // Buscamos la información completa de los asientos seleccionados
@@ -76,11 +76,15 @@ export default function EventDetails() {
         });
     });
 
-    // Guardamos en el contexto global
-    addToCart(selectedObjects);
+    // Guardamos en el contexto global (ahora sincronizado con backend)
+    const result = await addToCart(selectedObjects);
     
-    // Redirigimos al carrito
-    navigate('/cart');
+    if (result.success) {
+        // Redirigimos al carrito
+        navigate('/cart');
+    } else {
+        alert(result.error);
+    }
   };
 
   if (loading) return (
