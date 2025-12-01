@@ -11,6 +11,9 @@ from .estructuras import cola_virtual, historial_carrito
 from access_control.estructuras import validador_acceso
 from django.utils import timezone
 from datetime import timedelta
+from django.http import HttpResponse
+from weasyprint import HTML
+from django.template.loader import render_to_string
 
 class AddToCartView(APIView):
     """Agregar asientos al carrito y reservarlos temporalmente"""
@@ -217,3 +220,39 @@ class MyTicketsView(generics.ListAPIView):
     def get_queryset(self):
         # Retorna solo los tickets del usuario actual
         return Ticket.objects.filter(order__user=self.request.user).order_by('-id')
+
+class DownloadTicketPDFView(APIView):
+    """Generar y descargar PDF de un ticket"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, ticket_id):
+        try:
+            # Obtener ticket del usuario actual
+            ticket = Ticket.objects.select_related(
+                'seat__zone__event',
+                'order__user'
+            ).get(id=ticket_id, order__user=request.user)
+            
+            # Datos del template
+            context = {
+                'ticket': ticket,
+                'event': ticket.seat.zone.event,
+                'seat': ticket.seat,
+                'user': request.user,
+                'zone': ticket.seat.zone,
+            }
+            
+            # Renderizar HTML
+            html_string = render_to_string('ticket_pdf.html', context)
+            
+            # Generar PDF
+            pdf_file = HTML(string=html_string).write_pdf()
+            
+            # Respuesta HTTP
+            response = HttpResponse(pdf_file, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="ticket_{ticket.ticket_code}.pdf"'
+            
+            return response
+            
+        except Ticket.DoesNotExist:
+            return Response({"error": "Ticket no encontrado"}, status=404)

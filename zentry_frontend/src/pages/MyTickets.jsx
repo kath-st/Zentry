@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import Navbar from '../components/Navbar';
-import { Loader2, Calendar, MapPin, Ticket as TicketIcon } from 'lucide-react';
+import { Loader2, Calendar, MapPin, Ticket as TicketIcon, Download } from 'lucide-react';
 
 export default function MyTickets() {
   const [tickets, setTickets] = useState([]);
@@ -20,6 +20,26 @@ export default function MyTickets() {
     };
     fetchTickets();
   }, []);
+
+  const handleDownloadPDF = async (ticketId, ticketCode) => {
+    try {
+      const response = await api.get(`orders/tickets/${ticketId}/download/`, {
+        responseType: 'blob'
+      });
+      
+      // Crear URL del blob y descargar
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `ticket_${ticketCode}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Error descargando PDF:', error);
+      alert('Error al descargar el ticket');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-zentry-dark pb-20">
@@ -85,6 +105,15 @@ export default function MyTickets() {
                   {ticket.ticket_code}
                 </div>
                 <p className="text-[10px] text-gray-500 mt-2 text-center">Presenta este código en la entrada</p>
+                
+                {/* BOTÓN DESCARGAR PDF */}
+                <button
+                  onClick={() => handleDownloadPDF(ticket.id, ticket.ticket_code)}
+                  className="mt-4 bg-zentry-primary hover:bg-zentry-secondary text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all"
+                >
+                  <Download size={16} />
+                  Descargar PDF
+                </button>
               </div>
 
             </div>
