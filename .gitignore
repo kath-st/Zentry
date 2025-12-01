@@ -9,6 +9,8 @@ __pycache__/
 venv/
 env/
 ENV/
+.venv/
+zentry_backend/.venv/
 
 # Django / local files
 db.sqlite3
