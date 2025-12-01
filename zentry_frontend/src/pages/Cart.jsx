@@ -97,6 +97,15 @@ export default function Cart() {
       <div className="max-w-4xl mx-auto px-4 py-10">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Mi Carrito de Compras</h1>
+          {/* TIMER DE EXPIRACIÓN */}
+          {cartItems.length > 0 && expirationTime && (
+            <div className="flex items-center gap-2 bg-orange-500/10 px-4 py-2 rounded-lg border border-orange-500/30">
+              <Clock className="text-orange-500" size={20} />
+              <span className="text-orange-500 font-mono font-bold">{timeRemaining}</span>
+            </div>
+          )}
+        </div>
+
         {cartItems.length === 0 ? (
            <div className="text-center py-20 bg-zentry-card rounded-2xl border border-white/5">
              <p className="text-gray-400 mb-4">Tu carrito está vacío.</p>
@@ -117,30 +126,18 @@ export default function Cart() {
                  </button>
                )}
 
-               {cartItems.map((item, index) => (
-
-        {cartItems.length === 0 ? (
-           <div className="text-center py-20 bg-zentry-card rounded-2xl border border-white/5">
-             <p className="text-gray-400 mb-4">Tu carrito está vacío.</p>
-             <button onClick={() => navigate('/')} className="text-zentry-primary hover:underline">Ir al Catálogo</button>
-           </div>
-        ) : (
+               {cartItems.map((item) => (
+                 <div key={item.id} className="bg-zentry-card p-4 rounded-xl border border-white/10 flex justify-between items-center hover:border-zentry-primary/30 transition-all">
+                    <div>
+                        <h3 className="font-bold text-lg">{item.event_title}</h3>
+                        <p className="text-zentry-muted text-sm">Asiento: {item.seat_label}</p>
+                    </div>
                     <div className="flex items-center gap-4">
                         <span className="font-bold">${item.price}</span>
                         <button 
                             onClick={() => handleRemoveItem(item.id)}
                             className="text-red-400 hover:text-red-300 p-2"
                             title="Eliminar y liberar reserva"
-                        >
-                            <Trash2 size={20} />
-                        </button>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <span className="font-bold">${item.price}</span>
-                        <button 
-                            onClick={() => removeFromCart(item.id)}
-                            className="text-red-400 hover:text-red-300 p-2"
-                            title="Eliminar (Stack Pop)"
                         >
                             <Trash2 size={20} />
                         </button>
