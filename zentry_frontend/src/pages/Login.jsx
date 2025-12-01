@@ -23,7 +23,7 @@ export default function Login() {
     if (result.success) {
       navigate('/'); // Redirigir al inicio
     } else {
-      setError(result.error); // Mostrar error del backend (ej: "Email no existe en Hash Table")
+      setError(result.error); // Mostrar error del backend 
       setIsSubmitting(false);
     }
   };

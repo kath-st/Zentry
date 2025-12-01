@@ -43,7 +43,7 @@ export default function Profile() {
         last_name: formData.last_name,
         email: formData.email,
         card_number: formData.card_number
-        // Nota: NO enviamos DNI porque es read-only en el backend (BST)
+        // No enviamos DNI porque es read-only en el backend (BST)
       });
       
       setProfile(res.data.data); // Actualizamos la vista con la respuesta
@@ -136,7 +136,7 @@ export default function Profile() {
                 <div>
                     <label className="text-xs text-zentry-muted uppercase font-bold mb-1 flex justify-between">
                         <span>Documento de Identidad</span>
-                        {isEditing && <span className="text-zentry-warning text-[10px]">NO EDITABLE (Estructura Árbol)</span>}
+                        {isEditing && <span className="text-zentry-warning text-[10px]">NO EDITABLE</span>}
                     </label>
                     <div className="relative">
                         <FileBadge className="absolute left-3 top-3 h-5 w-5 text-gray-500" />

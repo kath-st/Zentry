@@ -1,3 +1,4 @@
+# ...existing code...
 # Python bytecode
 __pycache__/
 *.py[cod]
@@ -8,6 +9,8 @@ __pycache__/
 venv/
 env/
 ENV/
+.venv/
+zentry_backend/.venv/
 
 # Django / local files
 db.sqlite3
@@ -45,3 +48,28 @@ Thumbs.db
 
 # Node
 node_modules/
+
+# --- Added common local/runtime entries ---
+# Local env overrides
+.env.local
+.envrc
+
+# SQLite journal files
+*.sqlite3-journal
+
+# Runserver pid (dev)
+runserver.pid
+
+# Instance or local deploy-specific dir
+instance/
+
+# pipenv / Poetry lock (if used)
+Pipfile.lock
+poetry.lock
+
+# Terraform / secrets (if present)
+*.tfstate
+*.tfvars
+
+# Add any other custom patterns below
+# ...existing code...
