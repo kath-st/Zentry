@@ -28,6 +28,5 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email', 'dni', 'card_number']
-        # IMPORTANTE: Bloqueamos el DNI para que no lo puedan editar
-        # y así no rompemos el orden del Árbol Binario.
+        # Bloqueamos el DNI para que no lo puedan editar, ya que el arbol BST depende de el DNI
         read_only_fields = ['dni']

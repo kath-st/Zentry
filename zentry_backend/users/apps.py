@@ -5,6 +5,7 @@ class UsersConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'users'
 
+    # Funcion para cargar las estrucuras en memoria al iniciar la app
     def ready(self):
             import sys
             if 'migrate' in sys.argv: return
@@ -15,7 +16,6 @@ class UsersConfig(AppConfig):
                 
                 usuarios = User.objects.all()
                 if usuarios.exists():
-                    print(f"🔄 Cargando estructuras de datos...")
                     for u in usuarios:
                         # 1. Cargar BST (Por DNI) - PARA REGISTRO
                         if u.dni and u.dni.isdigit():
@@ -24,6 +24,5 @@ class UsersConfig(AppConfig):
                         # 2. Cargar Hash Table (Por Email) - PARA LOGIN
                         tabla_login.insertar(u.email, u.id)
 
-                    print(f"⚡ [Hash Table] {usuarios.count()} emails indexados para Login O(1).")
             except Exception as e:
                 print(f"Error cargando estructuras: {e}")

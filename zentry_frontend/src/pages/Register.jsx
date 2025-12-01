@@ -142,7 +142,6 @@ export default function Register() {
           <div>
             <label className="text-xs text-gray-400 uppercase font-bold ml-1 flex justify-between">
               <span>Tarjeta de Crédito</span>
-              <span className="text-zentry-warning text-[10px] font-normal tracking-wide">SOLO SIMULACIÓN</span>
             </label>
             <div className="relative">
               <CreditCard className="absolute left-3 top-3 h-5 w-5 text-gray-500" />
@@ -151,7 +150,7 @@ export default function Register() {
                 type="text"
                 maxLength="16"
                 className="w-full bg-zentry-dark border border-white/10 rounded-lg pl-10 pr-4 py-3 text-white focus:border-zentry-primary focus:outline-none font-mono"
-                placeholder="4000 1234 5678 9010"
+                placeholder="xxxx xxxx xxxx xxxx"
                 onChange={handleChange}
               />
             </div>
