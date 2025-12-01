@@ -34,6 +34,15 @@ class PilaCarrito:
         if user_id in self.pilas_usuarios and self.pilas_usuarios[user_id]:
             return self.pilas_usuarios[user_id].pop() # Saca el último
         return None
+    
+    def get_all(self, user_id):
+        """Obtiene todos los asientos del carrito de un usuario"""
+        return self.pilas_usuarios.get(user_id, [])
+    
+    def clear(self, user_id):
+        """Limpia el carrito de un usuario"""
+        if user_id in self.pilas_usuarios:
+            self.pilas_usuarios[user_id] = []
 
 # Instancias Globales
 cola_virtual = ColaDeCompras()

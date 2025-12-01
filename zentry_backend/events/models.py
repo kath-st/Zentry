@@ -22,12 +22,28 @@ class Zone(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
 class Seat(models.Model):
-    STATUS_CHOICES = (('AVAILABLE', 'Disponible'), ('SOLD', 'Ocupado'))
+    STATUS_CHOICES = (
+        ('AVAILABLE', 'Disponible'),
+        ('RESERVED', 'Reservado Temporalmente'),
+        ('SOLD', 'Ocupado')
+    )
     
     zone = models.ForeignKey(Zone, on_delete=models.CASCADE, related_name='seats')
     row_label = models.CharField(max_length=5) # F1, F2
     number = models.IntegerField() # 1, 2, 3
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='AVAILABLE')
+    
+    # Campos para Reserva Temporal
+    reserved_by = models.ForeignKey('users.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='reserved_seats')
+    reserved_at = models.DateTimeField(null=True, blank=True)
+    reservation_expires_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['row_label', 'number']
+    
+    def is_reservation_expired(self):
+        """Verifica si la reserva ha expirado"""
+        from django.utils import timezone
+        if self.status == 'RESERVED' and self.reservation_expires_at:
+            return timezone.now() > self.reservation_expires_at
+        return False
