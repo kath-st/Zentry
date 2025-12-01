@@ -6,6 +6,30 @@ from .models import Order, Ticket
 from .serializers import PurchaseSerializer, TicketDetailSerializer
 from events.models import Seat
 from rest_framework import generics
+import uuid
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.db import transaction
+from .models import Order, Ticket
+from .serializers import PurchaseSerializer, TicketDetailSerializer
+from events.models import Seat
+from rest_framework import generics
+import uuid
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.db import transaction
+from .models import Order, Ticket
+from .serializers import PurchaseSerializer, TicketDetailSerializer
+from events.models import Seat
+from rest_framework import generics
+import uuid
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.db import transaction
+from .models import Order, Ticket
+from .serializers import PurchaseSerializer, TicketDetailSerializer
+from events.models import Seat
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from .estructuras import cola_virtual, historial_carrito
 from access_control.estructuras import validador_acceso

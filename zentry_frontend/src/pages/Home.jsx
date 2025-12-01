@@ -8,11 +8,14 @@ export default function Home() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sortOrder, setSortOrder] = useState('asc'); // Estado para el orden
 
   useEffect(() => {
     const fetchEvents = async () => {
+      setLoading(true); // Reiniciar loading al cambiar filtro
       try {
-        const res = await api.get('events/');
+        // Enviamos el parámetro 'order' a la API
+        const res = await api.get(`events/?order=${sortOrder}`);
         setEvents(res.data);
       } catch (err) {
         console.error(err);
@@ -22,12 +25,12 @@ export default function Home() {
       }
     };
     fetchEvents();
-  }, []);
+  }, [sortOrder]); // Se ejecuta cuando cambia sortOrder
 
   return (
     <div className="min-h-screen bg-zentry-dark pb-20">
       <Navbar />
-      
+
       {/* HERO */}
       <div className="relative border-b border-white/5 py-20 px-4 mb-12 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-zentry-primary/10 to-transparent pointer-events-none"></div>
@@ -43,7 +46,22 @@ export default function Home() {
 
       {/* GRID */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-bold text-white mb-8">Eventos Disponibles</h2>
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+          <h2 className="text-2xl font-bold text-white">Eventos Disponibles</h2>
+
+          {/* SELECTOR DE ORDEN */}
+          <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-lg border border-white/10">
+            <span className="text-sm text-zentry-muted">Ordenar por fecha:</span>
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              className="bg-transparent text-white text-sm font-medium focus:outline-none cursor-pointer"
+            >
+              <option value="asc" className="bg-zentry-dark text-white">Ascendente (Más próximos)</option>
+              <option value="desc" className="bg-zentry-dark text-white">Descendente (Más lejanos)</option>
+            </select>
+          </div>
+        </div>
 
         {loading && (
           <div className="flex justify-center py-20">

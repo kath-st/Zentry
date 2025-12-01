@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 export default function EventCard({ event }) {
   // Formatear fecha bonita
   const dateObj = new Date(event.date);
-  const dateStr = dateObj.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+  const dateStr = dateObj.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
   const timeStr = dateObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
   return (
