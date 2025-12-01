@@ -2,7 +2,9 @@ import requests
 from django.conf import settings
 from django.utils.dateparse import parse_datetime
 from .models import Event, Zone, Seat
+import requests
 
+#ESTA FUNCION DE AQUI LA USE USANDO POSTMAAAAAN CREO QUE NO ESTA IMPLEMENTADA EN NINGUN LADO, ES MÁS QUE NADA PARA CARGAR LA BASE DE DATOS SIN TENER QUE HACERLO MANUALMENTE EVENTO POR EVENTO (http://localhost:8000/api/events/import/tm/)
 def importar_eventos_ticketmaster(keyword="concert"):
     """
     1. Conecta a la API de Ticketmaster.
@@ -13,7 +15,7 @@ def importar_eventos_ticketmaster(keyword="concert"):
     params = {
         "apikey": settings.TM_API_KEY,
         "keyword": keyword,
-        "size": 5, # Traemos solo 5 para probar
+        "size": 30, # Traemos 30 
         "sort": "date,asc"
     }
 
@@ -22,39 +24,66 @@ def importar_eventos_ticketmaster(keyword="concert"):
 
     eventos_creados = []
 
-    if '_embedded' in data:
+    if '_embedded' in data and 'events' in data['_embedded']:
         for item in data['_embedded']['events']:
-            tm_id = item['id']
+            tm_id = item.get('id')
             
             # Evitar duplicados
-            if Event.objects.filter(tm_id=tm_id).exists():
+            if not tm_id or Event.objects.filter(tm_id=tm_id).exists():
                 continue
 
             # Extraer datos
-            title = item['name']
+            title = item.get('name', 'Untitled event')
+
+            # Imagen: elegir la primera url disponible
+            image = None
+            for img in item.get('images', []):
+                if img.get('url'):
+                    image = img['url']
+                    break
+
+            # Fecha: preferir dateTime, si no usar localDate
+            fecha_str = None
+            fechas = item.get('dates', {}).get('start', {})
+            fecha_str = fechas.get('dateTime') or fechas.get('localDate')
+
+            # Venue
+            venue = None
             try:
-                image = item['images'][0]['url'] # Tomamos la primera imagen
-                fecha_str = item['dates']['start']['dateTime']
-                venue = item['_embedded']['venues'][0]['name']
-                cat = item['classifications'][0]['segment']['name']
-            except (KeyError, IndexError):
-                continue # Si faltan datos, saltamos
+                venue = item['_embedded']['venues'][0].get('name')
+            except (KeyError, IndexError, TypeError):
+                venue = None
+
+            # Categoría (segment/genre)
+            cat = None
+            try:
+                clas = item.get('classifications', [])
+                if clas:
+                    cat = clas[0].get('segment', {}).get('name') or clas[0].get('genre', {}).get('name')
+            except Exception:
+                cat = None
 
             # 1. Crear Evento en BD
             evento = Event.objects.create(
                 tm_id=tm_id,
                 title=title,
-                image_url=image,
-                date=parse_datetime(fecha_str),
-                venue=venue,
-                category=cat
+                image_url=image or '',
+                date=parse_datetime(fecha_str) if fecha_str else None,
+                venue=venue or '',
+                category=cat or ''
             )
 
             # 2. Crear Zona "General" Automáticamente
-            zona = Zone.objects.create(event=evento, name="General", price=45.00)
+            zona = Zone.objects.create(event=evento, name="General", price=100.00)
 
             # 3. Generar Asientos Automáticamente
             generar_asientos_automaticos(zona)
+
+            #4. Crear Zona "VIP" Automáticamente
+            zona_vip = Zone.objects.create(event=evento, name="VIP", price=200.00)
+
+            # 5. Generar Asientos Automáticamente para VIP
+            generar_asientos_automaticos(zona_vip)
             
             eventos_creados.append(title)
     
