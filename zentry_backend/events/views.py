@@ -39,7 +39,46 @@ class EventListView(generics.ListAPIView):
 
         # 5. Serializar y responder
         serializer = self.get_serializer(sorted_events, many=True)
+# 1. API para Listar Eventos (Público)
+class EventListView(generics.ListAPIView):
+    permission_classes = [AllowAny]
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+
+    def list(self, request, *args, **kwargs):
+        """
+        Sobreescribimos el método list para usar nuestra Lista Enlazada y Merge Sort.
+        """
+        # 1. Obtener datos de la BD (QuerySet)
+        queryset = self.get_queryset()
+
+        # 2. Llenar la Lista Enlazada
+        linked_list = LinkedList()
+        for event in queryset:
+            linked_list.append(event)
+        
+        # 3. Ordenar usando Merge Sort (Por fecha)
+        # Leemos el parámetro 'order' de la URL (default: 'asc')
+        order_param = request.query_params.get('order', 'asc')
+        ascending = (order_param.lower() == 'asc')
+        
+        linked_list.sort(ascending=ascending)
+
+        # 4. Convertir de nuevo a lista para serializar
+        sorted_events = linked_list.to_list()
+
+        # 5. Serializar y responder
+        serializer = self.get_serializer(sorted_events, many=True)
         return Response(serializer.data)
+
+class EventDetailView(generics.RetrieveAPIView):
+    """
+    GET /api/events/<id>/
+    Detalle público de un evento.
+    """
+    permission_classes = [AllowAny]
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
 
 # 2. API para Importar desde Ticketmaster (Admin)
 class ImportEventsView(APIView):
