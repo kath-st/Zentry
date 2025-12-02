@@ -1,12 +1,13 @@
 from django.urls import path
 from .views import (
     EventListView, ImportEventsView, SeatMapView, 
-    EventCreateView, EventAdminDetailView
+    EventCreateView, EventAdminDetailView, EventDetailView
 )
 
 urlpatterns = [
     # Rutas Públicas
     path('', EventListView.as_view(), name='list-events'),
+    path('<int:pk>/', EventDetailView.as_view(), name='event-detail'),
     path('<int:event_id>/seats/', SeatMapView.as_view(), name='seat-map'),
     
     # Rutas Admin

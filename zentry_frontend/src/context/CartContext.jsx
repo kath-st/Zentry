@@ -13,23 +13,28 @@ export const CartProvider = ({ children }) => {
     // Función para agregar ítems y reservarlos en el backend
     const addToCart = async (items) => {
         try {
-            // Extraer IDs de los asientos
-            const seatIds = items.map(item => item.id);
-            
-            // Llamar al backend para reservar
-            const res = await api.post('orders/cart/add/', { seat_ids: seatIds });
-            
-            // Agregar al carrito local con los datos completos
-            setCartItems(prev => [...prev, ...items]);
-            
-            // Guardar tiempo de expiración
-            if (res.data.seats && res.data.seats[0]?.expires_at) {
-                setExpirationTime(new Date(res.data.seats[0].expires_at));
+            // 1. ITERAR: Tu backend protege asiento por asiento (Atomicidad)
+            // Por eso, en lugar de enviar una lista gigante, enviamos uno por uno
+            // a tu endpoint de bloqueo seguro.
+            for (const item of items) {
+                await api.post('reservations/bloquear/', { seat_id: item.id });
             }
-            
-            return { success: true, message: res.data.message };
+
+            // 2. ACTUALIZAR ESTADO LOCAL (Solo si el backend no dio error)
+            setCartItems(prev => [...prev, ...items]);
+
+            // 3. TIEMPO DE EXPIRACIÓN
+            // Como tu backend maneja 10 minutos fijos (según tu services.py),
+            // configuramos el timer visual aquí.
+            const expiration = new Date(new Date().getTime() + 10 * 60000);
+            setExpirationTime(expiration);
+
+            return { success: true, message: "Asientos bloqueados exitosamente" };
+
         } catch (error) {
-            const errorMsg = error.response?.data?.error || "Error al reservar asientos";
+            console.error("Error en bloqueo:", error);
+            // Si falla (ej. alguien te ganó el asiento), mostramos el error de tu backend
+            const errorMsg = error.response?.data?.error || "Error al reservar asiento";
             return { success: false, error: errorMsg };
         }
     };
@@ -38,13 +43,13 @@ export const CartProvider = ({ children }) => {
     const undoLastItem = async () => {
         try {
             const res = await api.post('orders/cart/undo/');
-            
+
             // Remover el último item del carrito local
             if (cartItems.length > 0) {
                 const seatIdToRemove = res.data.seat_id;
                 setCartItems(prev => prev.filter(item => item.id !== seatIdToRemove));
             }
-            
+
             return { success: true, message: res.data.message };
         } catch (error) {
             return { success: false, error: error.response?.data?.error || "Error al deshacer" };
@@ -86,12 +91,12 @@ export const CartProvider = ({ children }) => {
     }, [expirationTime]);
 
     return (
-        <CartContext.Provider value={{ 
-            cartItems, 
-            addToCart, 
+        <CartContext.Provider value={{
+            cartItems,
+            addToCart,
             undoLastItem,
             releaseReservation,
-            clearCart, 
+            clearCart,
             cartTotal,
             expirationTime
         }}>

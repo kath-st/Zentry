@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'users',
     'events',
     'orders',
+    'reservations',
     'access_control',
 ]
 
